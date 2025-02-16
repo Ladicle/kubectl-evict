@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
+	"k8s.io/utils/ptr"
 )
 
 var (
@@ -52,8 +53,12 @@ func main() {
 			}
 			if policy != "" {
 				switch policy {
-				case "Orphan", "Background", "Foreground":
-					opts.propagationPolicy = (*metav1.DeletionPropagation)(&policy)
+				case "background":
+					opts.propagationPolicy = ptr.To(metav1.DeletePropagationOrphan)
+				case "foreground":
+					opts.propagationPolicy = ptr.To(metav1.DeletePropagationForeground)
+				case "orphan":
+					opts.propagationPolicy = ptr.To(metav1.DeletePropagationOrphan)
 				default:
 					return cmdutil.UsageErrorf(cmd, "invalid propagation policy: %s", policy)
 				}
@@ -78,7 +83,7 @@ func main() {
 	cmd.SetUsageTemplate(cmd.UsageTemplate() + extraUsage)
 
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Enable the dray-run option.")
-	cmd.Flags().StringVar(&policy, "propagation-policy", "", "Propagation policy for deleting the pod. Valid values are 'orphan', 'background' and 'foreground'.")
+	cmd.Flags().StringVar(&policy, "cascade", "background", "Propagation policy for deleting the pod. Valid values are 'orphan', 'background' and 'foreground'.")
 	cmd.Flags().Int64Var(&gracePeriods, "grace-period", -1, "Period of time in seconds given to the pod to terminate gracefully. Ignored if negative.")
 
 	if err := cmd.Execute(); err != nil {
