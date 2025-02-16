@@ -1,0 +1,20 @@
+plugins:
+  # evict pod
+  evict:
+    shortCut: Ctrl-V
+    override: false
+    overwriteOutput: false
+    confirm: true
+    dangerous: true
+    description: Evict Pod
+    scopes:
+    - pods
+    command: kubectl
+    background: true
+    args:
+    - evict
+    - $NAME
+    - -n
+    - $NAMESPACE
+    - --context
+    - $CONTEXT
