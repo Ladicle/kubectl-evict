@@ -16,11 +16,13 @@ Usage:
   evict <POD_NAME>... [flags]
 
 Flags:
-      --dry-run                     Enable the dray-run option.
-      --grace-period int            Period of time in seconds given to the pod to terminate gracefully. Ignored if negative. (default -1)
-  -h, --help                        help for evict
-      --propagation-policy string   Propagation policy for deleting the pod. Valid values are 'orphan', 'background' and 'foreground'.
-  -v, --version                     version for evict
+      --cascade string     Propagation policy for deleting the pod. Valid values are 'orphan', 'background' and 'foreground'. (default "background")
+      --dry-run            Enable the dray-run option.
+      --grace-period int   Period of time in seconds given to the pod to terminate gracefully. Ignored if negative. (default -1)
+  -h, --help               help for evict
+  -v, --version            version for evict
+
+Use "kubectl options" for a list of global command-line options (applies to all commands).
 ```
 
 ### Use via k9s
