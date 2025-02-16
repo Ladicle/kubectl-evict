@@ -71,9 +71,11 @@ func main() {
 	cfgFlags.AddFlags(fsets)
 	matchVersionFlags := cmdutil.NewMatchVersionFlags(cfgFlags)
 	matchVersionFlags.AddFlags(fsets)
-	fsets.VisitAll(func(f *pflag.Flag) { f.Hidden = true })
-
 	opts.f = cmdutil.NewFactory(matchVersionFlags)
+
+	fsets.VisitAll(func(f *pflag.Flag) { f.Hidden = true })
+	const extraUsage = "\nUse \"kubectl options\" for a list of global command-line options (applies to all commands).\n"
+	cmd.SetUsageTemplate(cmd.UsageTemplate() + extraUsage)
 
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Enable the dray-run option.")
 	cmd.Flags().StringVar(&policy, "propagation-policy", "", "Propagation policy for deleting the pod. Valid values are 'orphan', 'background' and 'foreground'.")
