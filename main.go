@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/awslabs/operatorpkg/context"
@@ -61,7 +62,7 @@ func main() {
 				opts.gracePeriodSeconds = &gracePeriods
 			}
 
-			return run(cmd.Context(), opts)
+			return run(cmd.Context(), cmd.OutOrStdout(), opts)
 		},
 	}
 
@@ -83,7 +84,7 @@ func main() {
 	}
 }
 
-func run(ctx context.Context, opts options) error {
+func run(ctx context.Context, out io.Writer, opts options) error {
 	k8sCfg := opts.f.ToRawKubeConfigLoader()
 	namespace, _, err := k8sCfg.Namespace()
 	if err != nil {
@@ -108,7 +109,7 @@ func run(ctx context.Context, opts options) error {
 		}); err != nil {
 			return err
 		}
-		fmt.Printf("pod/%s evicted\n", name)
+		fmt.Fprintf(out, "pod/%s evicted\n", name)
 	}
 	return nil
 }
