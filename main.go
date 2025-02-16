@@ -20,7 +20,7 @@ var (
 )
 
 type options struct {
-	podName string
+	podNames []string
 
 	dryRun             []string
 	propagationPolicy  *metav1.DeletionPropagation
@@ -37,14 +37,14 @@ func main() {
 		gracePeriods int64
 	)
 	cmd := &cobra.Command{
-		Use:          "evict <POD_NAME>",
+		Use:          "evict <POD_NAME>...",
 		SilenceUsage: true,
 		Version:      fmt.Sprintf("%s (%s)", version, commit),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
+			if len(args) == 0 {
 				return cmdutil.UsageErrorf(cmd, "evict requires POD_NAME")
 			}
-			opts.podName = args[0]
+			opts.podNames = args
 
 			if dryRun {
 				opts.dryRun = append(opts.dryRun, metav1.DryRunAll)
@@ -94,18 +94,21 @@ func run(ctx context.Context, opts options) error {
 		return err
 	}
 
-	if err := client.PolicyV1().Evictions(namespace).Evict(ctx, &policyv1.Eviction{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      opts.podName,
-			Namespace: namespace,
-		},
-		DeleteOptions: &metav1.DeleteOptions{
-			GracePeriodSeconds: opts.gracePeriodSeconds,
-			PropagationPolicy:  opts.propagationPolicy,
-			DryRun:             opts.dryRun,
-		},
-	}); err != nil {
-		return fmt.Errorf("failed to evict pod %s: %s", opts.podName, err)
+	for _, name := range opts.podNames {
+		if err := client.PolicyV1().Evictions(namespace).Evict(ctx, &policyv1.Eviction{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+			DeleteOptions: &metav1.DeleteOptions{
+				GracePeriodSeconds: opts.gracePeriodSeconds,
+				PropagationPolicy:  opts.propagationPolicy,
+				DryRun:             opts.dryRun,
+			},
+		}); err != nil {
+			return err
+		}
+		fmt.Printf("pod/%s evicted\n", name)
 	}
 	return nil
 }
